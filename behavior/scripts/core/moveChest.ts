@@ -32,6 +32,7 @@ import {
   mainhand,
   withTempTickingArea,
 } from "../utils/utils";
+import { StorageMap } from "./storageMap";
 import type { ToolLoreData } from "../types";
 
 let structureSeq = 0;
@@ -94,18 +95,19 @@ export class MoveChestCore {
 
   // ---------- 搬起：箱子 -> 暂存维度 ----------
 
-  /** 把 sourceDim 的 chestLoc 处箱子复制到暂存维度的对应位置 */
+  /** 把 sourceDim 的 sourceLoc 处箱子复制到暂存维度的 destLoc 槽位 */
   private static async captureToStorage(
     sourceDim: Dimension,
-    chestLoc: Vector3,
+    sourceLoc: Vector3,
+    destLoc: Vector3,
   ): Promise<boolean> {
     const storage = this.getStorageDimension();
 
-    const done = await withTempTickingArea(storage, chestLoc, () => {
-      // 暂存位置必须为空
+    const done = await withTempTickingArea(storage, destLoc, () => {
+      // 暂存槽位必须为空
       let destBlock: Block | undefined;
       try {
-        destBlock = storage.getBlock(chestLoc);
+        destBlock = storage.getBlock(destLoc);
       } catch {
         destBlock = undefined;
       }
@@ -116,11 +118,11 @@ export class MoveChestCore {
         world.structureManager.createFromWorld(
           structureId,
           sourceDim,
-          chestLoc,
-          chestLoc,
+          sourceLoc,
+          sourceLoc,
           { includeEntities: false },
         );
-        world.structureManager.place(structureId, storage, chestLoc);
+        world.structureManager.place(structureId, storage, destLoc);
         world.structureManager.delete(structureId);
       } catch (error) {
         console.warn(`[MoveChest] capture failed: ${error}`);
@@ -128,7 +130,7 @@ export class MoveChestCore {
       }
 
       // 校验复制成功
-      const placed = storage.getBlock(chestLoc);
+      const placed = storage.getBlock(destLoc);
       return !!placed && CHEST_TYPE_IDS.has(placed.typeId);
     });
 
@@ -146,13 +148,25 @@ export class MoveChestCore {
 
     const chestLoc = { ...block.location };
 
-    const ok = await this.captureToStorage(block.dimension, chestLoc);
+    // 分配暂存槽位
+    const storageSlot = StorageMap.allocSlot();
+    if (storageSlot === undefined) {
+      player.sendMessage("§c[搬箱器]§r 暂存维度已满，无法搬起");
+      return;
+    }
+    const storedLoc = StorageMap.locFromSlot(storageSlot)!;
+
+    const ok = await this.captureToStorage(block.dimension, chestLoc, storedLoc);
     if (!ok) {
+      StorageMap.freeSlot(storageSlot); // 归还失败的槽位
       player.sendMessage(
-        "§c[搬箱器]§r 暂存失败：目标暂存位被占用或区块加载异常",
+        "§c[搬箱器]§r 暂存失败：目标暂存槽位被占用或区块加载异常",
       );
       return;
     }
+
+    // 记录占用映射（来源信息）
+    StorageMap.setEntry(storageSlot, { d: block.dimension.id, l: chestLoc });
 
     if (REMOVE_SOURCE_ON_PICKUP) {
       try {
@@ -165,7 +179,7 @@ export class MoveChestCore {
     }
 
     if (!this.isMainhand(player, tier.itemId)) {
-      player.sendMessage("§c[搬箱器]§r 物品已不在主手，箱子仍暂存于对应坐标");
+      player.sendMessage("§c[搬箱器]§r 物品已不在主手，箱子仍暂存于对应槽位");
       return;
     }
 
@@ -181,16 +195,22 @@ export class MoveChestCore {
     if (nextDu <= 0) {
       slot?.setItem(undefined);
       player.sendMessage(
-        `§c[搬箱器]§r 工具已损坏！箱子仍暂存于 §7(${chestLoc.x}, ${chestLoc.y}, ${chestLoc.z})§r，请尽快用新工具取回`,
+        `§c[搬箱器]§r 工具已损坏！箱子仍暂存于槽位 §7#${storageSlot}§r，请尽快用新工具取回`,
       );
       return;
     }
 
     slot?.setItem(
-      this.buildUsedItem(tier.id, block.dimension.id, chestLoc, nextDu),
+      this.buildUsedItem(
+        tier.id,
+        block.dimension.id,
+        chestLoc,
+        nextDu,
+        storageSlot,
+      ),
     );
     player.sendMessage(
-      `§a[搬箱器]§r 已搬起箱子暂存于 §7(${chestLoc.x}, ${chestLoc.y}, ${chestLoc.z})§r §8[耐久 ${nextDu}/${tier.maxDurability}]`,
+      `§a[搬箱器]§r 已搬起箱子，暂存槽位 §7#${storageSlot}§r §8[耐久 ${nextDu}/${tier.maxDurability}]`,
     );
   }
 
@@ -205,8 +225,13 @@ export class MoveChestCore {
     if (!held || !USED_TOOL_IDS.has(held.typeId)) return;
 
     const data: ToolLoreData | undefined = decodeToolData(held.getLore());
-    if (!data || !data.l || typeof data.du !== "number") {
-      player.sendMessage("§c[搬箱器]§r 数据损坏：未找到箱子暂存坐标");
+    if (
+      !data ||
+      typeof data.s !== "number" ||
+      !data.l ||
+      typeof data.du !== "number"
+    ) {
+      player.sendMessage("§c[搬箱器]§r 数据损坏：未找到箱子暂存槽位");
       return;
     }
     // 品级优先取 lore，兜底按使用中物品 id 反查
@@ -233,7 +258,11 @@ export class MoveChestCore {
     }
 
     const storage = this.getStorageDimension();
-    const storedLoc = data.l;
+    const storedLoc = StorageMap.locFromSlot(data.s);
+    if (!storedLoc) {
+      player.sendMessage("§c[搬箱器]§r 数据损坏：暂存槽位越界");
+      return;
+    }
 
     let restoredType: string | undefined;
     await withTempTickingArea(storage, storedLoc, () => {
@@ -258,25 +287,32 @@ export class MoveChestCore {
         return;
       }
 
-      // 清理暂存维度：移除暂存方块与实体
+      // 清理该暂存槽位：移除方块与附近散落实体（维度共享，仅作用本格）
       try {
         storage.getBlock(storedLoc)?.setType("minecraft:air");
       } catch {
         /* ignore */
       }
-      for (const entity of storage.getEntities()) {
-        try {
+      try {
+        for (const entity of storage.getEntities({
+          location: storedLoc,
+          volume: { x: 2, y: 2, z: 2 },
+          type: "minecraft:item",
+        })) {
           entity.remove();
-        } catch {
-          /* ignore */
         }
+      } catch {
+        /* ignore */
       }
     });
 
     if (!restoredType) {
-      player.sendMessage("§c[搬箱器]§r 暂存数据失效：暂存处没有箱子");
+      player.sendMessage("§c[搬箱器]§r 暂存数据失效：暂存槽位没有箱子");
       return;
     }
+
+    // 回收槽位
+    StorageMap.freeSlot(data.s);
 
     if (!this.isMainhand(player, tier.usedItemId)) {
       player.sendMessage("§a[搬箱器]§r 箱子已放置，请手动检查工具状态");
@@ -319,13 +355,22 @@ export class MoveChestCore {
     sourceDimId: string,
     loc: Vector3,
     du: number,
+    storageSlot: number,
   ): ItemStack {
     const tier = getTier(tierId);
     const item = new ItemStack(
       tier?.usedItemId ?? tier?.itemId ?? MOVETOOL_FALLBACK_ID,
       1,
     );
-    item.setLore(buildUsedLore({ t: tierId, du, d: sourceDimId, l: loc }));
+    item.setLore(
+      buildUsedLore({
+        t: tierId,
+        du,
+        s: storageSlot,
+        d: sourceDimId,
+        l: loc,
+      }),
+    );
     return item;
   }
 

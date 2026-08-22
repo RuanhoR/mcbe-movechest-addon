@@ -92,12 +92,12 @@ export function buildIdleLore(tierId: string, du: number): string[] {
   ];
 }
 
-/** 使用中状态 lore：暂存坐标 + 耐久显示行 + 数据行 */
+/** 使用中状态 lore：暂存槽位 + 耐久显示行 + 数据行 */
 export function buildUsedLore(
-  data: ToolLoreData & { d: string; l: Vector3 },
+  data: ToolLoreData & { s: number; d: string; l: Vector3 },
 ): string[] {
   return [
-    `§r§7暂存坐标: §b${data.l.x}, ${data.l.y}, ${data.l.z}`,
+    `§r§7来源: §f${data.l.x}, ${data.l.y}, ${data.l.z} §r§8#${data.s}`,
     durabilityLine(data.t, data.du),
     JSON.stringify(data satisfies ToolLoreData),
   ];
@@ -113,6 +113,7 @@ export function decodeToolData(lore: string[]): ToolLoreData | undefined {
       if (
         typeof parsed.t === "string" &&
         typeof parsed.du === "number" &&
+        (parsed.s === undefined || typeof parsed.s === "number") &&
         (parsed.l === undefined ||
           (typeof parsed.l.x === "number" &&
             typeof parsed.l.y === "number" &&

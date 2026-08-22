@@ -6,8 +6,10 @@ export interface ToolLoreData {
   t: string;
   /** 当前耐久 */
   du: number;
+  /** 暂存槽位索引（仅使用中状态存在） */
+  s?: number;
   /** 原始维度 id（仅使用中状态存在） */
   d?: string;
-  /** 暂存坐标（仅使用中状态存在，与原坐标一致） */
+  /** 来源坐标（仅使用中状态存在，原世界位置） */
   l?: Vector3;
 }

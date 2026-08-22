@@ -1,6 +1,26 @@
 /** 暂存维度 typeId（虚空生成器，startup 时注册） */
 export const STORAGE_DIMENSION_ID = "movechest:mover_dim";
 
+// ---------- 暂存槽位空间 ----------
+/** 槽位 x 方向数量上限 */
+export const SLOTS_X = 30000;
+/** 槽位 z 方向数量上限 */
+export const SLOTS_Z = 30000;
+/** 槽位 y 方向数量上限 */
+export const SLOTS_Y = 100;
+
+/** 占用映射：每个 world dyprop 分块存储的条目数 */
+export const MAP_BUCKET_SIZE = 128;
+/** 空闲链：每个 world dyprop 分块存储的槽数 */
+export const FREE_CHUNK_SIZE = 256;
+
+/** 分配游标 dyprop 键 */
+export const DP_ALLOC_NEXT_KEY = "movechest:alloc_next";
+/** 占用映射 dyprop 键前缀（movechest:map_{bucket}） */
+export const DP_MAP_PREFIX = "movechest:map_";
+/** 空闲链 dyprop 键前缀（movechest:free_{i}） */
+export const DP_FREE_PREFIX = "movechest:free_";
+
 /** 搬箱器 - 使用中（搬着箱子，各品级独立） */
 export type ToolTierId = "wood" | "stone" | "iron" | "diamond";
 
