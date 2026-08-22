@@ -2,7 +2,7 @@
   "name": "@ruanhor/movechest",
   "description": "搬箱器！",
   "version": "0.0.1",
-  "packageManager": "pnpm",
+  "packageManager": "pnpm@11.0.0",
   "engines": {
     "node": ">=18.0.0"
   },
