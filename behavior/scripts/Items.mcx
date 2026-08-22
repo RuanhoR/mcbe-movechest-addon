@@ -22,17 +22,26 @@ import StoneUsedIcon from "./assets/moveChestIconUsed_Stone.png";
 import IronUsedIcon from "./assets/moveChestIconUsed_Iron.png";
 import DiamondUsedIcon from "./assets/moveChestIconUsed_Diamond.png";
 
-function makeTool(id: string, icon?: typeof WoodIcon, glint = false) {
+function makeTool(
+  id: string,
+  icon?: typeof WoodIcon,
+  glint = false,
+  hidden = false,
+) {
   const item = new ItemComponent({
     id,
     components: {},
     format: "1.21.0",
+    // none -> 创造物品栏隐藏（仍可命令获取）
+    menu_category: { category: hidden ? "none" : "items" },
   });
   item.setMaxStackSize(1);
   if (icon) item.setIcon(icon);
   if (glint) item.setGlint(true);
   return item;
 }
+
+/** 搬箱器 - 静置（木/石/铁/钻石） */
 export const WoodMoveTool = makeTool("movechest:wood_movetool", WoodIcon);
 export const StoneMoveTool = makeTool("movechest:stone_movetool", StoneIcon);
 export const IronMoveTool = makeTool("movechest:iron_movetool", IronIcon);
@@ -40,24 +49,30 @@ export const DiamondMoveTool = makeTool(
   "movechest:diamond_movetool",
   DiamondIcon,
 );
+
+/** 搬箱器 - 使用中（各品级独立，创造物品栏隐藏） */
 export const WoodMoveToolUsed = makeTool(
   "movechest:wood_movetool_used",
   WoodUsedIcon,
+  true,
   true,
 );
 export const StoneMoveToolUsed = makeTool(
   "movechest:stone_movetool_used",
   StoneUsedIcon,
   true,
+  true,
 );
 export const IronMoveToolUsed = makeTool(
   "movechest:iron_movetool_used",
   IronUsedIcon,
   true,
+  true,
 );
 export const DiamondMoveToolUsed = makeTool(
   "movechest:diamond_movetool_used",
   DiamondUsedIcon,
+  true,
   true,
 );
 </script>
