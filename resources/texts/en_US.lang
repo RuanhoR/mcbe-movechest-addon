@@ -8,3 +8,19 @@ item.movechest:wood_movetool_used=Wooden Move Tool §7[In Use]
 item.movechest:stone_movetool_used=Stone Move Tool §7[In Use]
 item.movechest:iron_movetool_used=Iron Move Tool §7[In Use]
 item.movechest:diamond_movetool_used=Diamond Move Tool §7[In Use]
+
+## Script messages
+movechest.msg.pickup_full=§c[MoveChest]§r Storage dimension is full
+movechest.msg.pickup_capture_fail=§c[MoveChest]§r Failed to store: slot occupied or chunk loading error
+movechest.msg.pickup_lost_tool=§c[MoveChest]§r Tool left main hand; the chest remains stored in its slot
+movechest.msg.pickup_broken=§c[MoveChest]§r Tool broke! The chest is still stored at slot §7%1§r, retrieve it soon
+movechest.msg.pickup_ok=§a[MoveChest]§r Picked up chest, storage slot §7%1§r §8[Durability %2/%3]
+movechest.msg.bad_data_slot=§c[MoveChest]§r Corrupted data: no storage slot found
+movechest.msg.bad_data_tier=§c[MoveChest]§r Corrupted data: unknown tool tier
+movechest.msg.place_blocked=§c[MoveChest]§r Target position is occupied
+movechest.msg.slot_out_of_range=§c[MoveChest]§r Corrupted data: storage slot out of range
+movechest.msg.slot_empty=§c[MoveChest]§r Invalid storage: no chest in the slot
+movechest.msg.place_manual_check=§a[MoveChest]§r Chest placed, please check your tool manually
+movechest.msg.place_broken=§c[MoveChest]§r Tool broke! Chest placed at §7(%1, %2, %3)
+movechest.msg.place_ok=§a[MoveChest]§r Chest placed at §7(%1, %2, %3)§r §8[Durability %4/%5]
+

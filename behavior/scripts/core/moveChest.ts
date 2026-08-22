@@ -32,6 +32,7 @@ import {
   mainhand,
   withTempTickingArea,
 } from "../utils/utils";
+import { tr } from "../utils/message";
 import { StorageMap } from "./storageMap";
 import type { ToolLoreData } from "../types";
 
@@ -151,7 +152,7 @@ export class MoveChestCore {
     // 分配暂存槽位
     const storageSlot = StorageMap.allocSlot();
     if (storageSlot === undefined) {
-      player.sendMessage("§c[搬箱器]§r 暂存维度已满，无法搬起");
+      player.sendMessage(tr("movechest.msg.pickup_full"));
       return;
     }
     const storedLoc = StorageMap.locFromSlot(storageSlot)!;
@@ -159,9 +160,7 @@ export class MoveChestCore {
     const ok = await this.captureToStorage(block.dimension, chestLoc, storedLoc);
     if (!ok) {
       StorageMap.freeSlot(storageSlot); // 归还失败的槽位
-      player.sendMessage(
-        "§c[搬箱器]§r 暂存失败：目标暂存槽位被占用或区块加载异常",
-      );
+      player.sendMessage(tr("movechest.msg.pickup_capture_fail"));
       return;
     }
 
@@ -179,7 +178,7 @@ export class MoveChestCore {
     }
 
     if (!this.isMainhand(player, tier.itemId)) {
-      player.sendMessage("§c[搬箱器]§r 物品已不在主手，箱子仍暂存于对应槽位");
+      player.sendMessage(tr("movechest.msg.pickup_lost_tool"));
       return;
     }
 
@@ -195,7 +194,7 @@ export class MoveChestCore {
     if (nextDu <= 0) {
       slot?.setItem(undefined);
       player.sendMessage(
-        `§c[搬箱器]§r 工具已损坏！箱子仍暂存于槽位 §7#${storageSlot}§r，请尽快用新工具取回`,
+        tr("movechest.msg.pickup_broken", `#${storageSlot}`),
       );
       return;
     }
@@ -210,7 +209,7 @@ export class MoveChestCore {
       ),
     );
     player.sendMessage(
-      `§a[搬箱器]§r 已搬起箱子，暂存槽位 §7#${storageSlot}§r §8[耐久 ${nextDu}/${tier.maxDurability}]`,
+      tr("movechest.msg.pickup_ok", `#${storageSlot}`, nextDu, tier.maxDurability),
     );
   }
 
@@ -231,13 +230,13 @@ export class MoveChestCore {
       !data.l ||
       typeof data.du !== "number"
     ) {
-      player.sendMessage("§c[搬箱器]§r 数据损坏：未找到箱子暂存槽位");
+      player.sendMessage(tr("movechest.msg.bad_data_slot"));
       return;
     }
     // 品级优先取 lore，兜底按使用中物品 id 反查
     const tier = getTier(data.t) ?? getTierByUsedId(held.typeId);
     if (!tier) {
-      player.sendMessage("§c[搬箱器]§r 数据损坏：未知工具品级");
+      player.sendMessage(tr("movechest.msg.bad_data_tier"));
       return;
     }
 
@@ -253,14 +252,14 @@ export class MoveChestCore {
       targetBlock = undefined;
     }
     if (!targetBlock || !(targetBlock.isAir || targetBlock.isLiquid)) {
-      player.sendMessage("§c[搬箱器]§r 目标位置被占用，无法放置箱子");
+      player.sendMessage(tr("movechest.msg.place_blocked"));
       return;
     }
 
     const storage = this.getStorageDimension();
     const storedLoc = StorageMap.locFromSlot(data.s);
     if (!storedLoc) {
-      player.sendMessage("§c[搬箱器]§r 数据损坏：暂存槽位越界");
+      player.sendMessage(tr("movechest.msg.slot_out_of_range"));
       return;
     }
 
@@ -307,7 +306,7 @@ export class MoveChestCore {
     });
 
     if (!restoredType) {
-      player.sendMessage("§c[搬箱器]§r 暂存数据失效：暂存槽位没有箱子");
+      player.sendMessage(tr("movechest.msg.slot_empty"));
       return;
     }
 
@@ -315,7 +314,7 @@ export class MoveChestCore {
     StorageMap.freeSlot(data.s);
 
     if (!this.isMainhand(player, tier.usedItemId)) {
-      player.sendMessage("§a[搬箱器]§r 箱子已放置，请手动检查工具状态");
+      player.sendMessage(tr("movechest.msg.place_manual_check"));
       return;
     }
 
@@ -325,14 +324,21 @@ export class MoveChestCore {
     if (nextDu <= 0) {
       slot?.setItem(undefined);
       player.sendMessage(
-        `§c[搬箱器]§r 工具已损坏！箱子已放置于 §7(${target.x}, ${target.y}, ${target.z})`,
+        tr("movechest.msg.place_broken", target.x, target.y, target.z),
       );
       return;
     }
 
     slot?.setItem(this.buildIdleItem(tier.id, nextDu));
     player.sendMessage(
-      `§a[搬箱器]§r 箱子已放置于 §7(${target.x}, ${target.y}, ${target.z})§r §8[耐久 ${nextDu}/${tier.maxDurability}]`,
+      tr(
+        "movechest.msg.place_ok",
+        target.x,
+        target.y,
+        target.z,
+        nextDu,
+        tier.maxDurability,
+      ),
     );
   }
 

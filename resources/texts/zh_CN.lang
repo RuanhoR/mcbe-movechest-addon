@@ -8,3 +8,19 @@ item.movechest:wood_movetool_used=木制搬箱器 §7[使用中]
 item.movechest:stone_movetool_used=石制搬箱器 §7[使用中]
 item.movechest:iron_movetool_used=铁制搬箱器 §7[使用中]
 item.movechest:diamond_movetool_used=钻石搬箱器 §7[使用中]
+
+## 脚本消息
+movechest.msg.pickup_full=§c[搬箱器]§r 暂存维度已满，无法搬起
+movechest.msg.pickup_capture_fail=§c[搬箱器]§r 暂存失败：目标暂存槽位被占用或区块加载异常
+movechest.msg.pickup_lost_tool=§c[搬箱器]§r 物品已不在主手，箱子仍暂存于对应槽位
+movechest.msg.pickup_broken=§c[搬箱器]§r 工具已损坏！箱子仍暂存于槽位 §7%1§r，请尽快用新工具取回
+movechest.msg.pickup_ok=§a[搬箱器]§r 已搬起箱子，暂存槽位 §7%1§r §8[耐久 %2/%3]
+movechest.msg.bad_data_slot=§c[搬箱器]§r 数据损坏：未找到箱子暂存槽位
+movechest.msg.bad_data_tier=§c[搬箱器]§r 数据损坏：未知工具品级
+movechest.msg.place_blocked=§c[搬箱器]§r 目标位置被占用，无法放置箱子
+movechest.msg.slot_out_of_range=§c[搬箱器]§r 数据损坏：暂存槽位越界
+movechest.msg.slot_empty=§c[搬箱器]§r 暂存数据失效：暂存槽位没有箱子
+movechest.msg.place_manual_check=§a[搬箱器]§r 箱子已放置，请手动检查工具状态
+movechest.msg.place_broken=§c[搬箱器]§r 工具已损坏！箱子已放置于 §7(%1, %2, %3)
+movechest.msg.place_ok=§a[搬箱器]§r 箱子已放置于 §7(%1, %2, %3)§r §8[耐久 %4/%5]
+
