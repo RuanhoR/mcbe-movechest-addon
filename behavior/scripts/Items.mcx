@@ -1,0 +1,63 @@
+<Component>
+  <items>
+    <item id="wood_movetool.json">WoodMoveTool</item>
+    <item id="stone_movetool.json">StoneMoveTool</item>
+    <item id="iron_movetool.json">IronMoveTool</item>
+    <item id="diamond_movetool.json">DiamondMoveTool</item>
+    <item id="wood_movetool_used.json">WoodMoveToolUsed</item>
+    <item id="stone_movetool_used.json">StoneMoveToolUsed</item>
+    <item id="iron_movetool_used.json">IronMoveToolUsed</item>
+    <item id="diamond_movetool_used.json">DiamondMoveToolUsed</item>
+  </items>
+</Component>
+<script lang="ts">
+import { ItemComponent } from "@mbler/mcx-component";
+
+import WoodIcon from "./assets/moveChestIcon.png";
+import StoneIcon from "./assets/moveChestIcon_Stone.png";
+import IronIcon from "./assets/moveChestIcon_Iron.png";
+import DiamondIcon from "./assets/moveChestIcon_Diamond.png";
+import WoodUsedIcon from "./assets/moveChestIconUsed.png";
+import StoneUsedIcon from "./assets/moveChestIconUsed_Stone.png";
+import IronUsedIcon from "./assets/moveChestIconUsed_Iron.png";
+import DiamondUsedIcon from "./assets/moveChestIconUsed_Diamond.png";
+
+function makeTool(id: string, icon?: typeof WoodIcon, glint = false) {
+  const item = new ItemComponent({
+    id,
+    components: {},
+    format: "1.21.0",
+  });
+  item.setMaxStackSize(1);
+  if (icon) item.setIcon(icon);
+  if (glint) item.setGlint(true);
+  return item;
+}
+export const WoodMoveTool = makeTool("movechest:wood_movetool", WoodIcon);
+export const StoneMoveTool = makeTool("movechest:stone_movetool", StoneIcon);
+export const IronMoveTool = makeTool("movechest:iron_movetool", IronIcon);
+export const DiamondMoveTool = makeTool(
+  "movechest:diamond_movetool",
+  DiamondIcon,
+);
+export const WoodMoveToolUsed = makeTool(
+  "movechest:wood_movetool_used",
+  WoodUsedIcon,
+  true,
+);
+export const StoneMoveToolUsed = makeTool(
+  "movechest:stone_movetool_used",
+  StoneUsedIcon,
+  true,
+);
+export const IronMoveToolUsed = makeTool(
+  "movechest:iron_movetool_used",
+  IronUsedIcon,
+  true,
+);
+export const DiamondMoveToolUsed = makeTool(
+  "movechest:diamond_movetool_used",
+  DiamondUsedIcon,
+  true,
+);
+</script>

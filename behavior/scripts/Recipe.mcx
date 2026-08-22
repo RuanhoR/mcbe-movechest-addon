@@ -1,0 +1,42 @@
+<Component>
+  <recipes>
+    <recipe id="wood_movetool.json">woodRecipe</recipe>
+    <recipe id="stone_movetool.json">stoneRecipe</recipe>
+    <recipe id="iron_movetool.json">ironRecipe</recipe>
+    <recipe id="diamond_movetool.json">diamondRecipe</recipe>
+  </recipes>
+</Component>
+<script lang="ts">
+import { RecipeComponent } from "@mbler/mcx-component";
+function moveToolRecipe(
+  recipeId: string,
+  resultItem: string,
+  material: string,
+) {
+  return new RecipeComponent({ format: "1.17.0", id: recipeId, type: "shaped", tags: ["crafting_table"], pattern: ["K K", "KKK", " X "], key: { K: { item: "minecraft:stick" }, X: { item: material }, }, result: { item: resultItem }, });
+}
+
+export const woodRecipe = moveToolRecipe(
+  "movechest:wood_movetool_recipe",
+  "movechest:wood_movetool",
+  "minecraft:stick",
+);
+
+export const stoneRecipe = moveToolRecipe(
+  "movechest:stone_movetool_recipe",
+  "movechest:stone_movetool",
+  "minecraft:cobblestone",
+);
+
+export const ironRecipe = moveToolRecipe(
+  "movechest:iron_movetool_recipe",
+  "movechest:iron_movetool",
+  "minecraft:iron_ingot",
+);
+
+export const diamondRecipe = moveToolRecipe(
+  "movechest:diamond_movetool_recipe",
+  "movechest:diamond_movetool",
+  "minecraft:diamond",
+);
+</script>

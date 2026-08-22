@@ -1,0 +1,11 @@
+<Event @before>
+  playerInteractWithBlock = onTouchBlock
+</Event>
+<script lang="ts">
+import type { PlayerInteractWithBlockBeforeEvent } from "@minecraft/server";
+import { MoveChestCore } from "./core/moveChest";
+
+export function onTouchBlock(event: PlayerInteractWithBlockBeforeEvent): void {
+  MoveChestCore.onTouchBlock(event);
+}
+</script>
