@@ -135,7 +135,10 @@ export class MoveChestCore {
     return done === true;
   }
 
-  private static async pickupChest(player: Player, block: Block): Promise<void> {
+  private static async pickupChest(
+    player: Player,
+    block: Block,
+  ): Promise<void> {
     const held = mainhand(player);
     if (!held) return;
     const tier = getTierByItemId(held.typeId);
@@ -145,13 +148,17 @@ export class MoveChestCore {
 
     const ok = await this.captureToStorage(block.dimension, chestLoc);
     if (!ok) {
-      player.sendMessage("§c[搬箱器]§r 暂存失败：目标暂存位被占用或区块加载异常");
+      player.sendMessage(
+        "§c[搬箱器]§r 暂存失败：目标暂存位被占用或区块加载异常",
+      );
       return;
     }
 
     if (REMOVE_SOURCE_ON_PICKUP) {
       try {
-        block.dimension.getBlock(chestLoc)?.setType("minecraft:air");
+        block.dimension.runCommand(
+          `setblock ${block.location.x} ${block.location.y} ${block.location.z} air`,
+        );
       } catch {
         /* ignore */
       }
@@ -164,7 +171,10 @@ export class MoveChestCore {
 
     // 扣耐久：当前耐久取自 lore（无 lore 视为满耐久）
     const curData = decodeToolData(held.getLore());
-    const curDu = Math.min(curData?.du ?? tier.maxDurability, tier.maxDurability);
+    const curDu = Math.min(
+      curData?.du ?? tier.maxDurability,
+      tier.maxDurability,
+    );
     const nextDu = curDu - DURABILITY_COST;
 
     const slot = this.getMainhandSlot(player);
@@ -176,7 +186,9 @@ export class MoveChestCore {
       return;
     }
 
-    slot?.setItem(this.buildUsedItem(tier.id, block.dimension.id, chestLoc, nextDu));
+    slot?.setItem(
+      this.buildUsedItem(tier.id, block.dimension.id, chestLoc, nextDu),
+    );
     player.sendMessage(
       `§a[搬箱器]§r 已搬起箱子暂存于 §7(${chestLoc.x}, ${chestLoc.y}, ${chestLoc.z})§r §8[耐久 ${nextDu}/${tier.maxDurability}]`,
     );
@@ -276,7 +288,9 @@ export class MoveChestCore {
     const slot = this.getMainhandSlot(player);
     if (nextDu <= 0) {
       slot?.setItem(undefined);
-      player.sendMessage(`§c[搬箱器]§r 工具已损坏！箱子已放置于 §7(${target.x}, ${target.y}, ${target.z})`);
+      player.sendMessage(
+        `§c[搬箱器]§r 工具已损坏！箱子已放置于 §7(${target.x}, ${target.y}, ${target.z})`,
+      );
       return;
     }
 
@@ -307,7 +321,10 @@ export class MoveChestCore {
     du: number,
   ): ItemStack {
     const tier = getTier(tierId);
-    const item = new ItemStack(tier?.usedItemId ?? tier?.itemId ?? MOVETOOL_FALLBACK_ID, 1);
+    const item = new ItemStack(
+      tier?.usedItemId ?? tier?.itemId ?? MOVETOOL_FALLBACK_ID,
+      1,
+    );
     item.setLore(buildUsedLore({ t: tierId, du, d: sourceDimId, l: loc }));
     return item;
   }
