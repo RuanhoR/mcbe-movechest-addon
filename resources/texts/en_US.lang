@@ -24,3 +24,7 @@ movechest.msg.place_manual_check=§a[MoveChest]§r Chest placed, please check yo
 movechest.msg.place_broken=§c[MoveChest]§r Tool broke! Chest placed at §7(%1, %2, %3)
 movechest.msg.place_ok=§a[MoveChest]§r Chest placed at §7(%1, %2, %3)§r §8[Durability %4/%5]
 
+## Actionbar progress
+movechest.progress.pickup=§bMoveChest §7» §fPicking up
+movechest.progress.place=§bMoveChest §7» §fPlacing
+

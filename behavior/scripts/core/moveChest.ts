@@ -12,6 +12,7 @@ import {
   type Vector3,
 } from "@minecraft/server";
 import {
+  ACTIONBAR_PROGRESS_TICKS,
   CHEST_TYPE_IDS,
   DURABILITY_COST,
   getTier,
@@ -32,7 +33,7 @@ import {
   mainhand,
   withTempTickingArea,
 } from "../utils/utils";
-import { tr } from "../utils/message";
+import { tr, withProgressBar } from "../utils/message";
 import { StorageMap } from "./storageMap";
 import type { ToolLoreData } from "../types";
 
@@ -157,7 +158,13 @@ export class MoveChestCore {
     }
     const storedLoc = StorageMap.locFromSlot(storageSlot)!;
 
-    const ok = await this.captureToStorage(block.dimension, chestLoc, storedLoc);
+    const ok =
+      (await withProgressBar(
+        player,
+        "movechest.progress.pickup",
+        ACTIONBAR_PROGRESS_TICKS,
+        () => this.captureToStorage(block.dimension, chestLoc, storedLoc),
+      )) === true;
     if (!ok) {
       StorageMap.freeSlot(storageSlot); // 归还失败的槽位
       player.sendMessage(tr("movechest.msg.pickup_capture_fail"));
@@ -182,34 +189,24 @@ export class MoveChestCore {
       return;
     }
 
-    // 扣耐久：当前耐久取自 lore（无 lore 视为满耐久）
+    // 耐久仅在搬运完成（放置）时消耗；搬起只透传当前耐久
     const curData = decodeToolData(held.getLore());
-    const curDu = Math.min(
+    const du = Math.min(
       curData?.du ?? tier.maxDurability,
       tier.maxDurability,
     );
-    const nextDu = curDu - DURABILITY_COST;
 
-    const slot = this.getMainhandSlot(player);
-    if (nextDu <= 0) {
-      slot?.setItem(undefined);
-      player.sendMessage(
-        tr("movechest.msg.pickup_broken", `#${storageSlot}`),
-      );
-      return;
-    }
-
-    slot?.setItem(
+    this.getMainhandSlot(player)?.setItem(
       this.buildUsedItem(
         tier.id,
         block.dimension.id,
         chestLoc,
-        nextDu,
+        du,
         storageSlot,
       ),
     );
     player.sendMessage(
-      tr("movechest.msg.pickup_ok", `#${storageSlot}`, nextDu, tier.maxDurability),
+      tr("movechest.msg.pickup_ok", `#${storageSlot}`, du, tier.maxDurability),
     );
   }
 
@@ -263,47 +260,43 @@ export class MoveChestCore {
       return;
     }
 
-    let restoredType: string | undefined;
-    await withTempTickingArea(storage, storedLoc, () => {
-      const stored = storage.getBlock(storedLoc);
-      if (!stored || !CHEST_TYPE_IDS.has(stored.typeId)) return;
-      restoredType = stored.typeId;
+    const restoredType = await withProgressBar(
+      player,
+      "movechest.progress.place",
+      ACTIONBAR_PROGRESS_TICKS,
+      () =>
+        withTempTickingArea(storage, storedLoc, () => {
+          const stored = storage.getBlock(storedLoc);
+          if (!stored || !CHEST_TYPE_IDS.has(stored.typeId)) {
+            return undefined;
+          }
 
-      const structureId = `${STRUCTURE_PREFIX}${structureSeq++}`;
-      try {
-        world.structureManager.createFromWorld(
-          structureId,
-          storage,
-          storedLoc,
-          storedLoc,
-          { includeEntities: false },
-        );
-        world.structureManager.place(structureId, block.dimension, target);
-        world.structureManager.delete(structureId);
-      } catch (error) {
-        console.warn(`[MoveChest] restore failed: ${error}`);
-        restoredType = undefined;
-        return;
-      }
+          const structureId = `${STRUCTURE_PREFIX}${structureSeq++}`;
+          try {
+            world.structureManager.createFromWorld(
+              structureId,
+              storage,
+              storedLoc,
+              storedLoc,
+              { includeEntities: false },
+            );
+            world.structureManager.place(structureId, block.dimension, target);
+            world.structureManager.delete(structureId);
+          } catch (error) {
+            console.warn(`[MoveChest] restore failed: ${error}`);
+            return undefined;
+          }
 
-      // 清理该暂存槽位：移除方块与附近散落实体（维度共享，仅作用本格）
-      try {
-        storage.getBlock(storedLoc)?.setType("minecraft:air");
-      } catch {
-        /* ignore */
-      }
-      try {
-        for (const entity of storage.getEntities({
-          location: storedLoc,
-          volume: { x: 2, y: 2, z: 2 },
-          type: "minecraft:item",
-        })) {
-          entity.remove();
-        }
-      } catch {
-        /* ignore */
-      }
-    });
+          // 清理该暂存槽位方块
+          try {
+            storage.getBlock(storedLoc)?.setType("minecraft:air");
+          } catch {
+            /* ignore */
+          }
+
+          return stored.typeId;
+        }),
+    );
 
     if (!restoredType) {
       player.sendMessage(tr("movechest.msg.slot_empty"));
@@ -318,7 +311,7 @@ export class MoveChestCore {
       return;
     }
 
-    // 扣耐久后重回对应品级的静置搬箱器
+    // 搬运完成：扣耐久后重回对应品级的静置搬箱器
     const nextDu = data.du - DURABILITY_COST;
     const slot = this.getMainhandSlot(player);
     if (nextDu <= 0) {

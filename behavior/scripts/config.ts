@@ -108,6 +108,9 @@ export const CHEST_TYPE_IDS: ReadonlySet<string> = new Set([
 /** 创建常加载区块后的额外等待时间（tick），等待区块完全可用 */
 export const LOAD_WAIT_TICKS = 2;
 
+/** actionbar 进度条预估推进时长（tick） */
+export const ACTIONBAR_PROGRESS_TICKS = 20;
+
 /** 临时结构 id 前缀（StructureSaveMode.Memory，用完即删） */
 export const STRUCTURE_PREFIX = "movechest:tmp_";
 

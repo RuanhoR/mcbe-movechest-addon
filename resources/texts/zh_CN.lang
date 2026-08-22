@@ -24,3 +24,7 @@ movechest.msg.place_manual_check=§a[搬箱器]§r 箱子已放置，请手动�
 movechest.msg.place_broken=§c[搬箱器]§r 工具已损坏！箱子已放置于 §7(%1, %2, %3)
 movechest.msg.place_ok=§a[搬箱器]§r 箱子已放置于 §7(%1, %2, %3)§r §8[耐久 %4/%5]
 
+## actionbar 进度条
+movechest.progress.pickup=§b搬箱器 §7» §f搬取中
+movechest.progress.place=§b搬箱器 §7» §f放置中
+
