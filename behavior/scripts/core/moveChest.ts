@@ -1,5 +1,6 @@
 import {
   EntityComponentTypes,
+  EntityInventoryComponent,
   EquipmentSlot,
   ItemStack,
   system,
@@ -378,5 +379,39 @@ export class MoveChestCore {
     const item = new ItemStack(tier?.itemId ?? MOVETOOL_FALLBACK_ID, 1);
     item.setLore(buildIdleLore(tierId, du));
     return item;
+  }
+
+  // ---------- 定时任务 ----------
+
+  /** 背包/副手持有使用中搬箱器 -> 缓慢 III（每 20t 刷新一次） */
+  public static startCarrySlowTask(): void {
+    system.runInterval(() => {
+      for (const player of world.getAllPlayers()) {
+        if (!this.isCarryingUsedTool(player)) continue;
+        player.addEffect("slowness", 45, {
+          amplifier: 2,
+          showParticles: false,
+        });
+      }
+    }, 20);
+  }
+
+  private static isCarryingUsedTool(player: Player): boolean {
+    const container = (
+      player.getComponent(EntityComponentTypes.Inventory) as
+        | EntityInventoryComponent
+        | undefined
+    )?.container;
+    if (container) {
+      for (let i = 0; i < container.size; i++) {
+        const item = container.getItem(i);
+        if (item && USED_TOOL_IDS.has(item.typeId)) return true;
+      }
+    }
+    const offhand = player
+      .getComponent(EntityComponentTypes.Equippable)
+      ?.getEquipmentSlot(EquipmentSlot.Offhand)
+      .getItem();
+    return !!offhand && USED_TOOL_IDS.has(offhand.typeId);
   }
 }
