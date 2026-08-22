@@ -1,0 +1,10 @@
+pack.name=搬箱器
+pack.description=§l搬箱器！把箱子连同内容物一起搬走
+item.movechest:wood_movetool=木制搬箱器 §8(耐久10)
+item.movechest:stone_movetool=石制搬箱器 §8(耐久50)
+item.movechest:iron_movetool=铁制搬箱器 §8(耐久200)
+item.movechest:diamond_movetool=钻石搬箱器 §8(耐久700)
+item.movechest:wood_movetool_used=木制搬箱器 §7[使用中]
+item.movechest:stone_movetool_used=石制搬箱器 §7[使用中]
+item.movechest:iron_movetool_used=铁制搬箱器 §7[使用中]
+item.movechest:diamond_movetool_used=钻石搬箱器 §7[使用中]

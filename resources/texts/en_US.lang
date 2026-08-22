@@ -1,0 +1,10 @@
+pack.name=MoveChest
+pack.description=§lMoveChest! Move chests together with their contents
+item.movechest:wood_movetool=Wooden Move Tool §8(10 uses)
+item.movechest:stone_movetool=Stone Move Tool §8(50 uses)
+item.movechest:iron_movetool=Iron Move Tool §8(200 uses)
+item.movechest:diamond_movetool=Diamond Move Tool §8(700 uses)
+item.movechest:wood_movetool_used=Wooden Move Tool §7[In Use]
+item.movechest:stone_movetool_used=Stone Move Tool §7[In Use]
+item.movechest:iron_movetool_used=Iron Move Tool §7[In Use]
+item.movechest:diamond_movetool_used=Diamond Move Tool §7[In Use]
