@@ -13,6 +13,7 @@
     "type-check": "mcx-tsc"
   },
   "type": "module",
+  "license": "MIT",
   "dependencies": {
     "@minecraft/server": "2.10.0-beta.1.26.40-preview.20",
     "@mbler/mcx": "0.0.5",
