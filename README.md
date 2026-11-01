@@ -1,5 +1,8 @@
 # MoveChest
 
+> [!NOTE]
+> This addon has moved into the [mcx-example-addon](https://github.com/RuanhoR/mcx-example-addon) monorepo and is now maintained there as a pnpm workspace package. This repository is kept for history.
+
 A Minecraft Bedrock addon (behavior + resource packs). Pick up chests together
 with their contents using the Move Tool, then place them back anywhere.
 Built with [mbler](https://github.com/RuanhoR/mbler) and the MCX DSL.

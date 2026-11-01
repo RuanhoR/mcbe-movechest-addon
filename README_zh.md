@@ -1,5 +1,8 @@
 # MoveChest 搬箱器
 
+> [!NOTE]
+> 本项目已迁移至 [mcx-example-addon](https://github.com/RuanhoR/mcx-example-addon) monorepo 统一管理。本仓库保留作历史存档。
+
 Minecraft Bedrock 附加包（行为包 + 资源包）。手持搬箱器把箱子连同内容物一起搬走，
 再触摸任意方块按所点面放置回去。基于 [mbler](https://github.com/RuanhoR/mbler) + MCX DSL 开发。
 
